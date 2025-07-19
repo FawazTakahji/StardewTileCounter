@@ -1,0 +1,13 @@
+﻿{
+  "Name": "Tile Counter",
+  "Author": "FawazT",
+  "Version": "1.0.0",
+  "Description": "A mod that counts tiles with specific properties in a selected area.",
+  "UniqueID": "FawazT.TileCounter",
+  "EntryDll": "TileCounter.dll",
+  "MinimumApiVersion": "4.0.0",
+  "UpdateKeys": [
+    "Nexus:35853",
+    "GitHub:FawazTakahji/StardewTileCounter"
+  ]
+}
