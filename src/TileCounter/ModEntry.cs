@@ -268,71 +268,71 @@ public class ModEntry : Mod
                 {
                     Vector2 tileWorldPos = new Vector2(minX + x, minY + y);
                     Vector2 tileScreenPos = TileToScreenCoordinates(tileWorldPos);
-                    Rectangle? sourceRect = null;
+                    (Rectangle rect, float rot) texture;
 
                     if (tileWidth == 1)
                     {
                         if (y == 0)
                         {
-                            sourceRect = Textures.GreenBox.BottomEmpty;
+                            texture = (Textures.GreenBox.ThreeLines.Rect, Textures.GreenBox.ThreeLines.TopRightLeft);
                         }
                         else if (y == tileHeight - 1)
                         {
-                            sourceRect = Textures.GreenBox.TopEmpty;
+                            texture = (Textures.GreenBox.ThreeLines.Rect, Textures.GreenBox.ThreeLines.BottomLeftRight);
                         }
                         else
                         {
-                            sourceRect = Textures.GreenBox.TopBottomEmpty;
+                            texture = (Textures.GreenBox.TwoLines.Rect, Textures.GreenBox.TwoLines.LeftRight);
                         }
                     }
                     else if (tileHeight == 1)
                     {
                         if (x == 0)
                         {
-                            sourceRect = Textures.GreenBox.RightEmpty;
+                            texture = (Textures.GreenBox.ThreeLines.Rect, Textures.GreenBox.ThreeLines.TopBottomLeft);
                         }
                         else if (x == tileWidth - 1)
                         {
-                            sourceRect = Textures.GreenBox.LeftEmpty;
+                            texture = (Textures.GreenBox.ThreeLines.Rect, Textures.GreenBox.ThreeLines.TopRightBottom);
                         }
                         else
                         {
-                            sourceRect = Textures.GreenBox.LeftRightEmpty;
+                            texture = (Textures.GreenBox.TwoLines.Rect, Textures.GreenBox.TwoLines.TopBottom);
                         }
                     }
                     else
                     {
                         if (x == 0 && y == 0)
                         {
-                            sourceRect = Textures.GreenBox.TopLeft;
+                            texture = (Textures.GreenBox.Corner.Rect, Textures.GreenBox.Corner.TopLef);
                         }
                         else if (x == tileWidth - 1 && y == 0)
                         {
-                            sourceRect = Textures.GreenBox.TopRight;
+                            texture = (Textures.GreenBox.Corner.Rect, Textures.GreenBox.Corner.TopRight);
                         }
                         else if (x == 0 && y == tileHeight - 1)
                         {
-                            sourceRect = Textures.GreenBox.BottomLeft;
+                            texture = (Textures.GreenBox.Corner.Rect, Textures.GreenBox.Corner.BottomLeft);
                         }
                         else if (x == tileWidth - 1 && y == tileHeight - 1)
                         {
-                            sourceRect = Textures.GreenBox.BottomRight;
+                            texture = (Textures.GreenBox.Corner.Rect, Textures.GreenBox.Corner.BottomRight);
                         }
                         else if (y == 0)
                         {
-                            sourceRect = Textures.GreenBox.Top;
+                            texture = (Textures.GreenBox.Line.Rect, Textures.GreenBox.Line.Top);
                         }
                         else if (y == tileHeight - 1)
                         {
-                            sourceRect = Textures.GreenBox.Bottom;
+                            texture = (Textures.GreenBox.Line.Rect, Textures.GreenBox.Line.Bottom);
                         }
                         else if (x == 0)
                         {
-                            sourceRect = Textures.GreenBox.Left;
+                            texture = (Textures.GreenBox.Line.Rect, Textures.GreenBox.Line.Left);
                         }
                         else if (x == tileWidth - 1)
                         {
-                            sourceRect = Textures.GreenBox.Right;
+                            texture = (Textures.GreenBox.Line.Rect, Textures.GreenBox.Line.Right);
                         }
                         else
                         {
@@ -341,11 +341,17 @@ public class ModEntry : Mod
                         }
                     }
 
+                    Vector2 origin = new Vector2(texture.rect.Width / 2f, texture.rect.Height / 2f);
                     spriteBatch.Draw(
                         Textures.MainTexture,
-                        tileScreenPos,
-                        sourceRect,
-                        Color.White);
+                        tileScreenPos + origin,
+                        texture.rect,
+                        Color.White,
+                        texture.rot,
+                        origin,
+                        Vector2.One,
+                        SpriteEffects.None,
+                        0f);
                 }
             }
         }
