@@ -4,6 +4,7 @@ namespace TileCounter;
 
 using Microsoft.Xna.Framework;
 
+// Rotation is in radians
 public struct Textures
 {
     public static Texture2D MainTexture = null!;
@@ -15,20 +16,39 @@ public struct Textures
     {
         public static readonly Rectangle Complete = new(0, 0, TexturePieceSize, TexturePieceSize);
 
-        public static readonly Rectangle TopLeft = new(0, 128, TexturePieceSize, TexturePieceSize);
-        public static readonly Rectangle BottomLeft = new(0, 192, TexturePieceSize, TexturePieceSize);
-        public static readonly Rectangle TopRight = new(0, 256, TexturePieceSize, TexturePieceSize);
-        public static readonly Rectangle BottomRight = new(0, 320, TexturePieceSize, TexturePieceSize);
-        public static readonly Rectangle Left = new(0, 384, TexturePieceSize, TexturePieceSize);
-        public static readonly Rectangle Right = new(0, 448, TexturePieceSize, TexturePieceSize);
-        public static readonly Rectangle Top = new(0, 512, TexturePieceSize, TexturePieceSize);
-        public static readonly Rectangle Bottom = new(0, 576, TexturePieceSize, TexturePieceSize);
-        public static readonly Rectangle TopEmpty = new(0, 640, TexturePieceSize, TexturePieceSize);
-        public static readonly Rectangle BottomEmpty = new(0, 704, TexturePieceSize, TexturePieceSize);
-        public static readonly Rectangle LeftEmpty = new(0, 768, TexturePieceSize, TexturePieceSize);
-        public static readonly Rectangle RightEmpty = new(0, 832, TexturePieceSize, TexturePieceSize);
-        public static readonly Rectangle TopBottomEmpty = new(0, 896, TexturePieceSize, TexturePieceSize);
-        public static readonly Rectangle LeftRightEmpty = new(0, 960, TexturePieceSize, TexturePieceSize);
+        public struct Corner
+        {
+            public static readonly Rectangle Rect = new(64, 0, TexturePieceSize, TexturePieceSize);
+            public const float TopLef = 0f;
+            public const float TopRight = 1.57f;
+            public const float BottomRight = 3.14f;
+            public const float BottomLeft = 4.71f;
+        }
+
+        public struct Line
+        {
+            public static readonly Rectangle Rect = new(128, 0, TexturePieceSize, TexturePieceSize);
+            public const float Left = 0f;
+            public const float Top = 1.57f;
+            public const float Right = 3.14f;
+            public const float Bottom = 4.71f;
+        }
+
+        public struct TwoLines
+        {
+            public static readonly Rectangle Rect = new(192, 0, TexturePieceSize, TexturePieceSize);
+            public const float LeftRight = 0f;
+            public const float TopBottom = 1.57f;
+        }
+
+        public struct ThreeLines
+        {
+            public static readonly Rectangle Rect = new(256, 0, TexturePieceSize, TexturePieceSize);
+            public const float TopBottomLeft = 0f;
+            public const float TopRightLeft = 1.57f;
+            public const float TopRightBottom = 3.14f;
+            public const float BottomLeftRight = 4.71f;
+        }
     }
 
     public struct RedBox
