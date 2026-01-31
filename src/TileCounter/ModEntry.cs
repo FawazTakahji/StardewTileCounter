@@ -104,6 +104,12 @@ public class ModEntry : Mod
         configMenu.AddSectionTitle(ModManifest, I18n.Keybinds);
         configMenu.AddKeybindList(
             ModManifest,
+            () => _config.ScanLocationKeys,
+            keys => _config.ScanLocationKeys = keys,
+            I18n.ScanCurrentLocation);
+
+        configMenu.AddKeybindList(
+            ModManifest,
             () => _config.SelectionModeKeys,
             keys => _config.SelectionModeKeys = keys,
             I18n.ToggleSelectionMode);
@@ -141,7 +147,11 @@ public class ModEntry : Mod
             return;
         }
 
-        if (_config.SelectionModeKeys.JustPressed())
+        if (_config.ScanLocationKeys.JustPressed())
+        {
+            ScanCurrentLocation();
+        }
+        else if (_config.SelectionModeKeys.JustPressed())
         {
             if (!_inSelectionMode)
             {
@@ -163,8 +173,7 @@ public class ModEntry : Mod
                 }
             }
         }
-
-        if (_inSelectionMode && _config.SelectTileKey.JustPressed())
+        else if (_inSelectionMode && _config.SelectTileKey.JustPressed())
         {
             TileClicked(Game1.wasMouseVisibleThisFrame ? Game1.currentCursorTile : GetTileInFrontOfPlayer());
 
@@ -388,6 +397,12 @@ public class ModEntry : Mod
     private static Vector2 TileToScreenCoordinates(Vector2 tile)
     {
         return new Vector2(tile.X * Game1.tileSize - Game1.viewport.X, tile.Y * Game1.tileSize - Game1.viewport.Y);
+    }
+
+    private void ScanCurrentLocation()
+    {
+        Vector2 lastTile = new Vector2(Game1.currentLocation.map.DisplayWidth - 1, Game1.currentLocation.map.DisplayHeight - 1);
+        ScanTiles(Vector2.Zero, lastTile);
     }
 
     private void ScanTiles(Vector2 pos1, Vector2 pos2)

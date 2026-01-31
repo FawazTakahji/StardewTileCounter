@@ -12,6 +12,10 @@ public sealed class ModConfig
     public bool CountSeedableTiles { get; set; } = true;
     public bool CountDiggableTiles { get; set; } = true;
 
+    public KeybindList ScanLocationKeys { get; set; } = new(
+        new Keybind(SButton.LeftControl, SButton.V),
+        new Keybind(SButton.ControllerY, SButton.DPadRight));
+
     public KeybindList SelectionModeKeys { get; set; } = new(
         new Keybind(SButton.LeftControl, SButton.C),
         new Keybind(SButton.ControllerY, SButton.DPadUp));

@@ -19,6 +19,7 @@ Tile Counter is a Stardew Valley mod that counts tiles with specific properties 
 ## Controls
 | Keybind | Keyboard | Xbox Gamepad | Playstation Gamepad |
 | :-: | :-: | :-: | :-: |
+| Scan Current Location | Ctrl + V | Y + DPad Right | Triangle + DPad Right |
 | Toggle Selection Mode | Ctrl + C | Y + DPad Up | Triangle + DPad Up |
 | Select Tile | Mouse Left Click | A | Cross |
 
