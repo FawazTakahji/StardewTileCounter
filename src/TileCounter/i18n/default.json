@@ -5,10 +5,11 @@
   "countDryTiles": "Count Dry Tiles",
   "countSeedableTiles": "Count Seedable Tiles",
   "countDiggableTiles": "Count Diggable Tiles",
+
+  "keybinds": "Keybinds",
   "toggleSelectionMode": "Toggle Selection Mode",
-  "keyboard": "Keyboard",
-  "gamepad": "Gamepad",
   "selectKey": "Select Key",
+
   "selectedTiles": "Selected Tiles: {{count}}",
   "harvestableTiles": "Harvestable Tiles: {{count}}",
   "dryTiles": "Dry Tiles: {{count}}",
