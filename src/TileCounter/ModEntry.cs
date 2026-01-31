@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
+using StardewModdingAPI.Utilities;
 using StardewValley;
 using StardewValley.TerrainFeatures;
 using StardewValley.Tools;
@@ -42,7 +43,6 @@ public class ModEntry : Mod
         helper.Events.GameLoop.GameLaunched += OnGameLaunched;
         helper.Events.Display.RenderedWorld += OnRenderedWorld;
         helper.Events.Input.ButtonsChanged += OnButtonsChanged;
-        helper.Events.Input.ButtonPressed += OnButtonPressed;
         helper.Events.Player.Warped += OnWarped;
         helper.Events.GameLoop.ReturnedToTitle += OnReturnedToTitle;
     }
@@ -101,29 +101,18 @@ public class ModEntry : Mod
             value => _config.CountDiggableTiles = value,
             I18n.CountDiggableTiles);
 
-        configMenu.AddSectionTitle(ModManifest, I18n.ToggleSelectionMode);
+        configMenu.AddSectionTitle(ModManifest, I18n.Keybinds);
         configMenu.AddKeybindList(
             ModManifest,
-            () => _config.KSelectionModeKeys,
-            keys => _config.KSelectionModeKeys = keys,
-            I18n.Keyboard);
-        configMenu.AddKeybindList(
-            ModManifest,
-            () => _config.GSelectionModeKeys,
-            keys => _config.GSelectionModeKeys = keys,
-            I18n.Gamepad);
+            () => _config.SelectionModeKeys,
+            keys => _config.SelectionModeKeys = keys,
+            I18n.ToggleSelectionMode);
 
-        configMenu.AddSectionTitle(ModManifest, I18n.SelectKey);
-        configMenu.AddKeybind(
+        configMenu.AddKeybindList(
             ModManifest,
-            () => _config.KSelectKey,
-            key => _config.KSelectKey = key,
-            I18n.Keyboard);
-        configMenu.AddKeybind(
-            ModManifest,
-            () => _config.GSelectKey,
-            key => _config.GSelectKey = key,
-            I18n.Gamepad);
+            () => _config.SelectTileKey,
+            key => _config.SelectTileKey = key,
+            I18n.SelectKey);
     }
 
     private void OnRenderedWorld(object? sender, RenderedWorldEventArgs e)
@@ -147,40 +136,45 @@ public class ModEntry : Mod
 
     private void OnButtonsChanged(object? sender, ButtonsChangedEventArgs e)
     {
-        if (!Context.IsPlayerFree || (!_config.KSelectionModeKeys.JustPressed() && !_config.GSelectionModeKeys.JustPressed()))
+        if (!Context.IsPlayerFree)
         {
             return;
         }
 
-        if (!_inSelectionMode)
+        if (_config.SelectionModeKeys.JustPressed())
         {
-            _inSelectionMode = true;
-            Game1.playSound("breathin");
-        }
-        else
-        {
-            _inSelectionMode = false;
-            _selectedFirstTile = null;
-            Game1.playSound("breathout");
-        }
-    }
+            if (!_inSelectionMode)
+            {
+                _inSelectionMode = true;
+                Game1.playSound("breathin");
+            }
+            else
+            {
+                _inSelectionMode = false;
+                _selectedFirstTile = null;
+                Game1.playSound("breathout");
+            }
 
-    private void OnButtonPressed(object? sender, ButtonPressedEventArgs e)
-    {
-        if (!_inSelectionMode || !Context.IsPlayerFree)
-        {
-            return;
+            foreach (Keybind keybind in _config.SelectionModeKeys.Keybinds)
+            {
+                foreach (SButton button in keybind.Buttons)
+                {
+                    Helper.Input.Suppress(button);
+                }
+            }
         }
 
-        if (Game1.wasMouseVisibleThisFrame && e.Button == _config.KSelectKey || e.Button == _config.GSelectKey)
+        if (_inSelectionMode && _config.SelectTileKey.JustPressed())
         {
-            TileClicked(Game1.currentCursorTile);
-            Helper.Input.Suppress(e.Button);
-        }
-        else if (!Game1.wasMouseVisibleThisFrame && e.Button == _config.GSelectKey)
-        {
-            TileClicked(GetTileInFrontOfPlayer());
-            Helper.Input.Suppress(e.Button);
+            TileClicked(Game1.wasMouseVisibleThisFrame ? Game1.currentCursorTile : GetTileInFrontOfPlayer());
+
+            foreach (Keybind keybind in _config.SelectTileKey.Keybinds)
+            {
+                foreach (SButton button in keybind.Buttons)
+                {
+                    Helper.Input.Suppress(button);
+                }
+            }
         }
     }
 
