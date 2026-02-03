@@ -7,6 +7,7 @@ using StardewModdingAPI.Utilities;
 using StardewValley;
 using StardewValley.TerrainFeatures;
 using StardewValley.Tools;
+using xTile.Layers;
 using Object = StardewValley.Object;
 using Texture2D = Microsoft.Xna.Framework.Graphics.Texture2D;
 
@@ -16,6 +17,7 @@ public class ModEntry : Mod
 {
     private ModConfig _config = new();
 
+    private bool _isScanning;
     private bool _inSelectionMode;
     private Vector2? _selectedFirstTile;
 
@@ -378,7 +380,10 @@ public class ModEntry : Mod
             _inSelectionMode = false;
             _selectedFirstTile = null;
             Game1.playSound("coin");
-            ScanTiles(firstTile, tile);
+            ScanTiles(firstTile, tile).SafeFireAndForget(ex =>
+            {
+                Monitor.Log($"Error while scanning tiles: {ex}", LogLevel.Error);
+            });
         }
     }
 
@@ -401,103 +406,155 @@ public class ModEntry : Mod
 
     private void ScanCurrentLocation()
     {
-        Vector2 lastTile = new Vector2(Game1.currentLocation.map.DisplayWidth - 1, Game1.currentLocation.map.DisplayHeight - 1);
-        ScanTiles(Vector2.Zero, lastTile);
+        Layer? backLayer = Game1.currentLocation.map.GetLayer("Back");
+        if (backLayer == null)
+        {
+            Game1.addHUDMessage(new HUDMessage(I18n.NoBackLayer(), HUDMessage.error_type));
+            return;
+        }
+
+        Vector2 lastTile = new Vector2(backLayer.LayerWidth - 1, backLayer.LayerHeight - 1);
+        ScanTiles(Vector2.Zero, lastTile).SafeFireAndForget(ex =>
+        {
+            Monitor.Log($"Error while scanning tiles: {ex}", LogLevel.Error);
+        });
     }
 
-    private void ScanTiles(Vector2 pos1, Vector2 pos2)
+    private async Task ScanTiles(Vector2 pos1, Vector2 pos2)
     {
-        int minX = (int)Math.Min(pos1.X, pos2.X);
-        int maxX = (int)Math.Max(pos1.X, pos2.X);
-        int minY = (int)Math.Min(pos1.Y, pos2.Y);
-        int maxY = (int)Math.Max(pos1.Y, pos2.Y);
-
-        int seedableTiles = 0;
-        int dryTiles = 0;
-        int diggableTiles = 0;
-        int harvestableTiles = 0;
-
-        for (int x = minX; x <= maxX; x++)
+        if (_isScanning)
         {
-            for (int y = minY; y <= maxY; y++)
+            return;
+        }
+
+        try
+        {
+            _isScanning = true;
+
+            int minX = (int)Math.Min(pos1.X, pos2.X);
+            int maxX = (int)Math.Max(pos1.X, pos2.X);
+            int minY = (int)Math.Min(pos1.Y, pos2.Y);
+            int maxY = (int)Math.Max(pos1.Y, pos2.Y);
+
+            const CollisionMask mask = CollisionMask.Buildings | CollisionMask.Flooring | CollisionMask.Furniture
+                                       | CollisionMask.Objects | CollisionMask.LocationSpecific |
+                                       CollisionMask.TerrainFeatures;
+
+            int seedableTiles = 0;
+            int dryTiles = 0;
+            int diggableTiles = 0;
+            int harvestableTiles = 0;
+
+            Game1.addHUDMessage(new HUDMessage(I18n.CountingTiles())
             {
-                Vector2 position = new Vector2(x, y);
-                const CollisionMask mask = CollisionMask.Buildings | CollisionMask.Flooring | CollisionMask.Furniture
-                                           | CollisionMask.Objects | CollisionMask.LocationSpecific | CollisionMask.TerrainFeatures;
+                type = "TileCounter_Progress",
+                messageSubject = ItemRegistry.Create("170")
+            });
 
-                if ((_config.CountSeedableTiles || _config.CountHarvestableTiles || _config.CountDryTiles)
-                    && Game1.currentLocation.terrainFeatures.TryGetValue(position, out TerrainFeature terrainFeature)
-                    && terrainFeature is HoeDirt dirt
-                    && !Game1.currentLocation.IsTileOccupiedBy(position, mask, CollisionMask.TerrainFeatures))
+            // Avoid blocking main thread
+            await Task.Run(() =>
+            {
+                if (_config.CountSeedableTiles || _config.CountHarvestableTiles || _config.CountDryTiles)
                 {
-                    if (_config.CountSeedableTiles && dirt.crop == null)
+                    foreach (var (pos, value) in Game1.currentLocation.terrainFeatures.Pairs)
                     {
-                        seedableTiles++;
-                    }
-                    else if (_config.CountHarvestableTiles && dirt.readyForHarvest())
-                    {
-                        harvestableTiles++;
-                    }
+                        if (pos.X >= minX && pos.X <= maxX && pos.Y >= minY && pos.Y <= maxY)
+                        {
+                            if (value is HoeDirt dirt &&
+                                !Game1.currentLocation.IsTileOccupiedBy(pos, mask, CollisionMask.TerrainFeatures))
+                            {
+                                if (_config.CountSeedableTiles && dirt.crop == null)
+                                {
+                                    seedableTiles++;
+                                }
+                                else if (_config.CountHarvestableTiles && dirt.readyForHarvest())
+                                {
+                                    harvestableTiles++;
+                                }
 
-                    if (_config.CountDryTiles && !dirt.isWatered())
-                    {
-                        dryTiles++;
+                                if (_config.CountDryTiles && !dirt.isWatered())
+                                {
+                                    dryTiles++;
+                                }
+                            }
+                        }
                     }
                 }
-                else if (_config.CountDiggableTiles
-                         && Game1.currentLocation.doesTileHaveProperty(x, y, "Diggable", "Back") != null
-                         && !Game1.currentLocation.IsTileOccupiedBy(position, mask))
+
+                if (_config.CountDiggableTiles)
                 {
-                    diggableTiles++;
+                    for (int x = minX; x <= maxX; x++)
+                    {
+                        for (int y = minY; y <= maxY; y++)
+                        {
+                            if (Game1.currentLocation.doesTileHaveProperty(x, y, "Diggable", "Back") != null)
+                            {
+                                if (!Game1.currentLocation.IsTileOccupiedBy(new Vector2(x, y), mask))
+                                {
+                                    diggableTiles++;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            for (int i = Game1.hudMessages.Count - 1; i >= 0; i--)
+            {
+                if (Game1.hudMessages[i].type?.StartsWith("TileCounter_") == true)
+                {
+                    Game1.hudMessages.RemoveAt(i);
                 }
             }
-        }
 
-        var oldMessages = Game1.hudMessages.Where(m => m.type != null && m.type.StartsWith("TileCounter_")).ToList();
-        foreach (HUDMessage oldMessage in oldMessages)
-        {
-            Game1.hudMessages.Remove(oldMessage);
-        }
+            if (_config.CountSelectedTiles)
+            {
+                Game1.addHUDMessage(new HUDMessage(I18n.SelectedTiles((maxX - minX + 1) * (maxY - minY + 1)))
+                {
+                    type = "TileCounter_Selected",
+                    messageSubject = new Object("293", 1)
+                });
+            }
 
-        if (_config.CountSelectedTiles)
-        {
-            Game1.addHUDMessage(new HUDMessage(I18n.SelectedTiles((maxX - minX + 1) * (maxY - minY + 1)))
+            if (harvestableTiles > 0)
             {
-                type = "TileCounter_Selected",
-                messageSubject = new Object("293", 1)
-            });
+                Game1.addHUDMessage(new HUDMessage(I18n.HarvestableTiles(harvestableTiles))
+                {
+                    type = "TileCounter_Harvestable",
+                    messageSubject = new Object("24", 1)
+                });
+            }
+
+            if (dryTiles > 0)
+            {
+                Game1.addHUDMessage(new HUDMessage(I18n.DryTiles(dryTiles))
+                {
+                    type = "TileCounter_Dry",
+                    messageSubject = new Object("407", 1)
+                });
+            }
+
+            if (seedableTiles > 0)
+            {
+                Game1.addHUDMessage(new HUDMessage(I18n.SeedableTiles(seedableTiles))
+                {
+                    type = "TileCounter_Seedable",
+                    messageSubject = new Object("472", 1)
+                });
+            }
+
+            if (diggableTiles > 0)
+            {
+                Game1.addHUDMessage(new HUDMessage(I18n.DiggableTiles(diggableTiles))
+                {
+                    type = "TileCounter_Diggable",
+                    messageSubject = new Hoe()
+                });
+            }
         }
-        if (harvestableTiles > 0)
+        finally
         {
-            Game1.addHUDMessage(new HUDMessage(I18n.HarvestableTiles(harvestableTiles))
-            {
-                type = "TileCounter_Harvestable",
-                messageSubject = new Object("24", 1)
-            });
-        }
-        if (dryTiles > 0)
-        {
-            Game1.addHUDMessage(new HUDMessage(I18n.DryTiles(dryTiles))
-            {
-                type = "TileCounter_Dry",
-                messageSubject = new Object("407", 1)
-            });
-        }
-        if (seedableTiles > 0)
-        {
-            Game1.addHUDMessage(new HUDMessage(I18n.SeedableTiles(seedableTiles))
-            {
-                type = "TileCounter_Seedable",
-                messageSubject = new Object("472", 1)
-            });
-        }
-        if (diggableTiles > 0)
-        {
-            Game1.addHUDMessage(new HUDMessage(I18n.DiggableTiles(diggableTiles))
-            {
-                type = "TileCounter_Diggable",
-                messageSubject = new Hoe()
-            });
+            _isScanning = false;
         }
     }
 }
