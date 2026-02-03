@@ -1,7 +1,7 @@
 ﻿{
   "Name": "Tile Counter",
   "Author": "FawazT",
-  "Version": "1.1.0",
+  "Version": "1.2.0",
   "Description": "A mod that counts tiles with specific properties in a selected area.",
   "UniqueID": "FawazT.TileCounter",
   "EntryDll": "TileCounter.dll",
