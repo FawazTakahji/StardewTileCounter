@@ -11,6 +11,9 @@
   "toggleSelectionMode": "Toggle Selection Mode",
   "selectKey": "Select Key",
 
+  "noBackLayer": "Couldn't find the Back layer",
+  "countingTiles": "Counting Tiles...",
+
   "selectedTiles": "Selected Tiles: {{count}}",
   "harvestableTiles": "Harvestable Tiles: {{count}}",
   "dryTiles": "Dry Tiles: {{count}}",
