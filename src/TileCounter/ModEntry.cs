@@ -9,13 +9,12 @@ using StardewValley.TerrainFeatures;
 using StardewValley.Tools;
 using xTile.Layers;
 using Object = StardewValley.Object;
-using Texture2D = Microsoft.Xna.Framework.Graphics.Texture2D;
 
 namespace TileCounter;
 
 public class ModEntry : Mod
 {
-    private ModConfig _config = new();
+    public static ModConfig Config = new();
 
     private bool _isScanning;
     private bool _inSelectionMode;
@@ -26,7 +25,7 @@ public class ModEntry : Mod
         I18n.Init(helper.Translation);
         try
         {
-            _config = Helper.ReadConfig<ModConfig>();
+            Config = Helper.ReadConfig<ModConfig>();
         }
         catch (Exception ex)
         {
@@ -67,60 +66,7 @@ public class ModEntry : Mod
             return;
         }
 
-        configMenu.Register(
-            ModManifest,
-            () => _config = new ModConfig(),
-            () => Helper.WriteConfig(_config));
-
-        configMenu.AddBoolOption(
-            ModManifest,
-            () => _config.SimpleBorder,
-            value => _config.SimpleBorder = value,
-            I18n.SimpleBorder);
-        configMenu.AddBoolOption(
-            ModManifest,
-            () => _config.CountSelectedTiles,
-            value => _config.CountSelectedTiles = value,
-            I18n.CountSelectedTiles);
-        configMenu.AddBoolOption(
-            ModManifest,
-            () => _config.CountHarvestableTiles,
-            value => _config.CountHarvestableTiles = value,
-            I18n.CountHarvestableTiles);
-        configMenu.AddBoolOption(
-            ModManifest,
-            () => _config.CountDryTiles,
-            value => _config.CountDryTiles = value,
-            I18n.CountDryTiles);
-        configMenu.AddBoolOption(
-            ModManifest,
-            () => _config.CountSeedableTiles,
-            value => _config.CountSeedableTiles = value,
-            I18n.CountSeedableTiles);
-        configMenu.AddBoolOption(
-            ModManifest,
-            () => _config.CountDiggableTiles,
-            value => _config.CountDiggableTiles = value,
-            I18n.CountDiggableTiles);
-
-        configMenu.AddSectionTitle(ModManifest, I18n.Keybinds);
-        configMenu.AddKeybindList(
-            ModManifest,
-            () => _config.ScanLocationKeys,
-            keys => _config.ScanLocationKeys = keys,
-            I18n.ScanCurrentLocation);
-
-        configMenu.AddKeybindList(
-            ModManifest,
-            () => _config.SelectionModeKeys,
-            keys => _config.SelectionModeKeys = keys,
-            I18n.ToggleSelectionMode);
-
-        configMenu.AddKeybindList(
-            ModManifest,
-            () => _config.SelectTileKey,
-            key => _config.SelectTileKey = key,
-            I18n.SelectKey);
+        Helpers.RegisterConfig(configMenu, ModManifest, Helper);
     }
 
     private void OnRenderedWorld(object? sender, RenderedWorldEventArgs e)
@@ -130,15 +76,15 @@ public class ModEntry : Mod
             return;
         }
 
-        Vector2 tile = Game1.wasMouseVisibleThisFrame ? Game1.currentCursorTile : GetTileInFrontOfPlayer();
+        Vector2 tile = Game1.wasMouseVisibleThisFrame ? Game1.currentCursorTile : Helpers.GetTileInFrontOfPlayer();
 
-        if (!Textures.Loaded || _config.SimpleBorder)
+        if (!Textures.Loaded || Config.SimpleBorder)
         {
-            RenderNoTextures(e.SpriteBatch, tile, _selectedFirstTile);
+            Helpers.RenderNoTextures(e.SpriteBatch, tile, _selectedFirstTile);
         }
         else
         {
-            RenderTextures(e.SpriteBatch, tile, _selectedFirstTile);
+            Helpers.RenderTextures(e.SpriteBatch, tile, _selectedFirstTile);
         }
     }
 
@@ -149,11 +95,11 @@ public class ModEntry : Mod
             return;
         }
 
-        if (_config.ScanLocationKeys.JustPressed())
+        if (Config.ScanLocationKeys.JustPressed())
         {
             ScanCurrentLocation();
         }
-        else if (_config.SelectionModeKeys.JustPressed())
+        else if (Config.SelectionModeKeys.JustPressed())
         {
             if (!_inSelectionMode)
             {
@@ -167,7 +113,7 @@ public class ModEntry : Mod
                 Game1.playSound("breathout");
             }
 
-            foreach (Keybind keybind in _config.SelectionModeKeys.Keybinds)
+            foreach (Keybind keybind in Config.SelectionModeKeys.Keybinds)
             {
                 foreach (SButton button in keybind.Buttons)
                 {
@@ -175,11 +121,11 @@ public class ModEntry : Mod
                 }
             }
         }
-        else if (_inSelectionMode && _config.SelectTileKey.JustPressed())
+        else if (_inSelectionMode && Config.SelectTileKey.JustPressed())
         {
-            TileClicked(Game1.wasMouseVisibleThisFrame ? Game1.currentCursorTile : GetTileInFrontOfPlayer());
+            TileClicked(Game1.wasMouseVisibleThisFrame ? Game1.currentCursorTile : Helpers.GetTileInFrontOfPlayer());
 
-            foreach (Keybind keybind in _config.SelectTileKey.Keybinds)
+            foreach (Keybind keybind in Config.SelectTileKey.Keybinds)
             {
                 foreach (SButton button in keybind.Buttons)
                 {
@@ -198,168 +144,6 @@ public class ModEntry : Mod
     {
         _selectedFirstTile = null;
         _inSelectionMode = false;
-    }
-
-    private static void RenderNoTextures(SpriteBatch spriteBatch, Vector2 currentTile, Vector2? selectedTile)
-    {
-        Vector2 screenTile = TileToScreenCoordinates(currentTile);
-        if (currentTile == selectedTile)
-        {
-
-            spriteBatch.Draw(
-                Game1.staminaRect,
-                screenTile,
-                new Rectangle(0, 0, 64, 64),
-                Color.Red * 0.5f);
-        }
-        else if (selectedTile == null && currentTile != selectedTile)
-        {
-            spriteBatch.Draw(
-                Game1.staminaRect,
-                screenTile,
-                new Rectangle(0, 0, 64, 64),
-                Color.Green * 0.5f);
-        }
-        else if (currentTile != selectedTile)
-        {
-            int minX = (int)Math.Min(currentTile.X, selectedTile.Value.X);
-            int maxX = (int)Math.Max(currentTile.X, selectedTile.Value.X);
-            int minY = (int)Math.Min(currentTile.Y, selectedTile.Value.Y);
-            int maxY = (int)Math.Max(currentTile.Y, selectedTile.Value.Y);
-
-            Vector2 screenTopLeft = TileToScreenCoordinates(new Vector2(minX, minY));
-            int width = maxX - minX + 1;
-            int height = maxY - minY + 1;
-
-            spriteBatch.Draw(
-                Game1.staminaRect,
-                new Rectangle((int)screenTopLeft.X, (int)screenTopLeft.Y, width * Game1.tileSize, height * Game1.tileSize),
-                new Rectangle(0, 0, Game1.tileSize, Game1.tileSize),
-                Color.Green * 0.5f);
-        }
-    }
-
-    private static void RenderTextures(SpriteBatch spriteBatch, Vector2 currentTile, Vector2? selectedTile)
-    {
-        if (currentTile == selectedTile)
-        {
-            spriteBatch.Draw(
-                Textures.MainTexture,
-                TileToScreenCoordinates(currentTile),
-                Textures.RedBox.Complete,
-                Color.White);
-        }
-        else if (selectedTile == null && currentTile != selectedTile)
-        {
-            spriteBatch.Draw(
-                Textures.MainTexture,
-                TileToScreenCoordinates(currentTile),
-                Textures.GreenBox.Complete,
-                Color.White);
-        }
-        else if (currentTile != selectedTile)
-        {
-            int minX = (int)Math.Min(currentTile.X, selectedTile.Value.X);
-            int maxX = (int)Math.Max(currentTile.X, selectedTile.Value.X);
-            int minY = (int)Math.Min(currentTile.Y, selectedTile.Value.Y);
-            int maxY = (int)Math.Max(currentTile.Y, selectedTile.Value.Y);
-
-            int tileWidth = maxX - minX + 1;
-            int tileHeight = maxY - minY + 1;
-
-            for (int y = 0; y < tileHeight; y++)
-            {
-                for (int x = 0; x < tileWidth; x++)
-                {
-                    Vector2 tileWorldPos = new Vector2(minX + x, minY + y);
-                    Vector2 tileScreenPos = TileToScreenCoordinates(tileWorldPos);
-                    (Rectangle rect, float rot) texture;
-
-                    if (tileWidth == 1)
-                    {
-                        if (y == 0)
-                        {
-                            texture = (Textures.GreenBox.ThreeLines.Rect, Textures.GreenBox.ThreeLines.TopRightLeft);
-                        }
-                        else if (y == tileHeight - 1)
-                        {
-                            texture = (Textures.GreenBox.ThreeLines.Rect, Textures.GreenBox.ThreeLines.BottomLeftRight);
-                        }
-                        else
-                        {
-                            texture = (Textures.GreenBox.TwoLines.Rect, Textures.GreenBox.TwoLines.LeftRight);
-                        }
-                    }
-                    else if (tileHeight == 1)
-                    {
-                        if (x == 0)
-                        {
-                            texture = (Textures.GreenBox.ThreeLines.Rect, Textures.GreenBox.ThreeLines.TopBottomLeft);
-                        }
-                        else if (x == tileWidth - 1)
-                        {
-                            texture = (Textures.GreenBox.ThreeLines.Rect, Textures.GreenBox.ThreeLines.TopRightBottom);
-                        }
-                        else
-                        {
-                            texture = (Textures.GreenBox.TwoLines.Rect, Textures.GreenBox.TwoLines.TopBottom);
-                        }
-                    }
-                    else
-                    {
-                        if (x == 0 && y == 0)
-                        {
-                            texture = (Textures.GreenBox.Corner.Rect, Textures.GreenBox.Corner.TopLef);
-                        }
-                        else if (x == tileWidth - 1 && y == 0)
-                        {
-                            texture = (Textures.GreenBox.Corner.Rect, Textures.GreenBox.Corner.TopRight);
-                        }
-                        else if (x == 0 && y == tileHeight - 1)
-                        {
-                            texture = (Textures.GreenBox.Corner.Rect, Textures.GreenBox.Corner.BottomLeft);
-                        }
-                        else if (x == tileWidth - 1 && y == tileHeight - 1)
-                        {
-                            texture = (Textures.GreenBox.Corner.Rect, Textures.GreenBox.Corner.BottomRight);
-                        }
-                        else if (y == 0)
-                        {
-                            texture = (Textures.GreenBox.Line.Rect, Textures.GreenBox.Line.Top);
-                        }
-                        else if (y == tileHeight - 1)
-                        {
-                            texture = (Textures.GreenBox.Line.Rect, Textures.GreenBox.Line.Bottom);
-                        }
-                        else if (x == 0)
-                        {
-                            texture = (Textures.GreenBox.Line.Rect, Textures.GreenBox.Line.Left);
-                        }
-                        else if (x == tileWidth - 1)
-                        {
-                            texture = (Textures.GreenBox.Line.Rect, Textures.GreenBox.Line.Right);
-                        }
-                        else
-                        {
-                            // middle
-                            continue;
-                        }
-                    }
-
-                    Vector2 origin = new Vector2(texture.rect.Width / 2f, texture.rect.Height / 2f);
-                    spriteBatch.Draw(
-                        Textures.MainTexture,
-                        tileScreenPos + origin,
-                        texture.rect,
-                        Color.White,
-                        texture.rot,
-                        origin,
-                        Vector2.One,
-                        SpriteEffects.None,
-                        0f);
-                }
-            }
-        }
     }
 
     private void TileClicked(Vector2 tile)
@@ -385,23 +169,6 @@ public class ModEntry : Mod
                 Monitor.Log($"Error while scanning tiles: {ex}", LogLevel.Error);
             });
         }
-    }
-
-    private static Vector2 GetTileInFrontOfPlayer()
-    {
-        return Game1.player.FacingDirection switch
-        {
-            0 => new Vector2(Game1.player.Tile.X, Game1.player.Tile.Y - 1), // up
-            1 => new Vector2(Game1.player.Tile.X + 1, Game1.player.Tile.Y), // right
-            2 => new Vector2(Game1.player.Tile.X, Game1.player.Tile.Y + 1), // down
-            3 => new Vector2(Game1.player.Tile.X - 1, Game1.player.Tile.Y), // left
-            _ => new Vector2(Game1.player.Tile.X, Game1.player.Tile.Y - 1) // maybe throw instead ?
-        };
-    }
-
-    private static Vector2 TileToScreenCoordinates(Vector2 tile)
-    {
-        return new Vector2(tile.X * Game1.tileSize - Game1.viewport.X, tile.Y * Game1.tileSize - Game1.viewport.Y);
     }
 
     private void ScanCurrentLocation()
@@ -454,7 +221,7 @@ public class ModEntry : Mod
             // Avoid blocking main thread
             await Task.Run(() =>
             {
-                if (_config.CountSeedableTiles || _config.CountHarvestableTiles || _config.CountDryTiles)
+                if (Config.CountSeedableTiles || Config.CountHarvestableTiles || Config.CountDryTiles)
                 {
                     foreach (var (pos, value) in Game1.currentLocation.terrainFeatures.Pairs)
                     {
@@ -463,16 +230,16 @@ public class ModEntry : Mod
                             if (value is HoeDirt dirt &&
                                 !Game1.currentLocation.IsTileOccupiedBy(pos, mask, CollisionMask.TerrainFeatures))
                             {
-                                if (_config.CountSeedableTiles && dirt.crop == null)
+                                if (Config.CountSeedableTiles && dirt.crop == null)
                                 {
                                     seedableTiles++;
                                 }
-                                else if (_config.CountHarvestableTiles && dirt.readyForHarvest())
+                                else if (Config.CountHarvestableTiles && dirt.readyForHarvest())
                                 {
                                     harvestableTiles++;
                                 }
 
-                                if (_config.CountDryTiles && !dirt.isWatered())
+                                if (Config.CountDryTiles && !dirt.isWatered())
                                 {
                                     dryTiles++;
                                 }
@@ -481,7 +248,7 @@ public class ModEntry : Mod
                     }
                 }
 
-                if (_config.CountDiggableTiles)
+                if (Config.CountDiggableTiles)
                 {
                     for (int x = minX; x <= maxX; x++)
                     {
@@ -507,7 +274,7 @@ public class ModEntry : Mod
                 }
             }
 
-            if (_config.CountSelectedTiles)
+            if (Config.CountSelectedTiles)
             {
                 Game1.addHUDMessage(new HUDMessage(I18n.SelectedTiles((maxX - minX + 1) * (maxY - minY + 1)))
                 {
