@@ -78,17 +78,16 @@ public static class Helpers
         };
     }
 
-    private static Vector2 TileToScreenCoordinates(Vector2 tile)
+    public static Vector2 TileToScreenCoordinates(Vector2 tile)
     {
         return new Vector2(tile.X * Game1.tileSize - Game1.viewport.X, tile.Y * Game1.tileSize - Game1.viewport.Y);
     }
 
-    private static void RenderNoTextures(SpriteBatch spriteBatch, Vector2 currentTile, Vector2? selectedTile)
+    public static void RenderNoTextures(SpriteBatch spriteBatch, Vector2 currentTile, Vector2? selectedTile)
     {
         Vector2 screenTile = TileToScreenCoordinates(currentTile);
         if (currentTile == selectedTile)
         {
-
             spriteBatch.Draw(
                 Game1.staminaRect,
                 screenTile,
@@ -122,7 +121,7 @@ public static class Helpers
         }
     }
 
-    private static void RenderTextures(SpriteBatch spriteBatch, Vector2 currentTile, Vector2? selectedTile)
+    public static void RenderTextures(SpriteBatch spriteBatch, Vector2 currentTile, Vector2? selectedTile)
     {
         if (currentTile == selectedTile)
         {
