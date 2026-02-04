@@ -5,6 +5,8 @@ namespace TileCounter;
 
 public sealed class ModConfig
 {
+    public static ModConfig Instance { get; set; } = new();
+
     public bool SimpleBorder { get; set; } = false;
     public bool CountSelectedTiles { get; set; } = true;
     public bool CountHarvestableTiles { get; set; } = true;

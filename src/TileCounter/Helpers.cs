@@ -12,57 +12,57 @@ public static class Helpers
     {
         api.Register(
             manifest,
-            () => ModEntry.Config = new ModConfig(),
-            () => modHelper.WriteConfig(ModEntry.Config));
+            () => ModConfig.Instance = new ModConfig(),
+            () => modHelper.WriteConfig(ModConfig.Instance));
 
         api.AddBoolOption(
             manifest,
-            () => ModEntry.Config.SimpleBorder,
-            value => ModEntry.Config.SimpleBorder = value,
+            () => ModConfig.Instance.SimpleBorder,
+            value => ModConfig.Instance.SimpleBorder = value,
             I18n.SimpleBorder);
         api.AddBoolOption(
             manifest,
-            () => ModEntry.Config.CountSelectedTiles,
-            value => ModEntry.Config.CountSelectedTiles = value,
+            () => ModConfig.Instance.CountSelectedTiles,
+            value => ModConfig.Instance.CountSelectedTiles = value,
             I18n.CountSelectedTiles);
         api.AddBoolOption(
             manifest,
-            () => ModEntry.Config.CountHarvestableTiles,
-            value => ModEntry.Config.CountHarvestableTiles = value,
+            () => ModConfig.Instance.CountHarvestableTiles,
+            value => ModConfig.Instance.CountHarvestableTiles = value,
             I18n.CountHarvestableTiles);
         api.AddBoolOption(
             manifest,
-            () => ModEntry.Config.CountDryTiles,
-            value => ModEntry.Config.CountDryTiles = value,
+            () => ModConfig.Instance.CountDryTiles,
+            value => ModConfig.Instance.CountDryTiles = value,
             I18n.CountDryTiles);
         api.AddBoolOption(
             manifest,
-            () => ModEntry.Config.CountSeedableTiles,
-            value => ModEntry.Config.CountSeedableTiles = value,
+            () => ModConfig.Instance.CountSeedableTiles,
+            value => ModConfig.Instance.CountSeedableTiles = value,
             I18n.CountSeedableTiles);
         api.AddBoolOption(
             manifest,
-            () => ModEntry.Config.CountDiggableTiles,
-            value => ModEntry.Config.CountDiggableTiles = value,
+            () => ModConfig.Instance.CountDiggableTiles,
+            value => ModConfig.Instance.CountDiggableTiles = value,
             I18n.CountDiggableTiles);
 
         api.AddSectionTitle(manifest, I18n.Keybinds);
         api.AddKeybindList(
             manifest,
-            () => ModEntry.Config.ScanLocationKeys,
-            keys => ModEntry.Config.ScanLocationKeys = keys,
+            () => ModConfig.Instance.ScanLocationKeys,
+            keys => ModConfig.Instance.ScanLocationKeys = keys,
             I18n.ScanCurrentLocation);
 
         api.AddKeybindList(
             manifest,
-            () => ModEntry.Config.SelectionModeKeys,
-            keys => ModEntry.Config.SelectionModeKeys = keys,
+            () => ModConfig.Instance.SelectionModeKeys,
+            keys => ModConfig.Instance.SelectionModeKeys = keys,
             I18n.ToggleSelectionMode);
 
         api.AddKeybindList(
             manifest,
-            () => ModEntry.Config.SelectTileKey,
-            key => ModEntry.Config.SelectTileKey = key,
+            () => ModConfig.Instance.SelectTileKey,
+            key => ModConfig.Instance.SelectTileKey = key,
             I18n.SelectKey);
     }
 

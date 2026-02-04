@@ -14,8 +14,6 @@ namespace TileCounter;
 
 public class ModEntry : Mod
 {
-    public static ModConfig Config = new();
-
     private bool _isScanning;
     private bool _inSelectionMode;
     private Vector2? _selectedFirstTile;
@@ -25,7 +23,7 @@ public class ModEntry : Mod
         I18n.Init(helper.Translation);
         try
         {
-            Config = Helper.ReadConfig<ModConfig>();
+            ModConfig.Instance = Helper.ReadConfig<ModConfig>();
         }
         catch (Exception ex)
         {
@@ -78,7 +76,7 @@ public class ModEntry : Mod
 
         Vector2 tile = Game1.wasMouseVisibleThisFrame ? Game1.currentCursorTile : Helpers.GetTileInFrontOfPlayer();
 
-        if (!Textures.Loaded || Config.SimpleBorder)
+        if (!Textures.Loaded || ModConfig.Instance.SimpleBorder)
         {
             Helpers.RenderNoTextures(e.SpriteBatch, tile, _selectedFirstTile);
         }
@@ -95,11 +93,11 @@ public class ModEntry : Mod
             return;
         }
 
-        if (Config.ScanLocationKeys.JustPressed())
+        if (ModConfig.Instance.ScanLocationKeys.JustPressed())
         {
             ScanCurrentLocation();
         }
-        else if (Config.SelectionModeKeys.JustPressed())
+        else if (ModConfig.Instance.SelectionModeKeys.JustPressed())
         {
             if (!_inSelectionMode)
             {
@@ -113,7 +111,7 @@ public class ModEntry : Mod
                 Game1.playSound("breathout");
             }
 
-            foreach (Keybind keybind in Config.SelectionModeKeys.Keybinds)
+            foreach (Keybind keybind in ModConfig.Instance.SelectionModeKeys.Keybinds)
             {
                 foreach (SButton button in keybind.Buttons)
                 {
@@ -121,11 +119,11 @@ public class ModEntry : Mod
                 }
             }
         }
-        else if (_inSelectionMode && Config.SelectTileKey.JustPressed())
+        else if (_inSelectionMode && ModConfig.Instance.SelectTileKey.JustPressed())
         {
             TileClicked(Game1.wasMouseVisibleThisFrame ? Game1.currentCursorTile : Helpers.GetTileInFrontOfPlayer());
 
-            foreach (Keybind keybind in Config.SelectTileKey.Keybinds)
+            foreach (Keybind keybind in ModConfig.Instance.SelectTileKey.Keybinds)
             {
                 foreach (SButton button in keybind.Buttons)
                 {
@@ -221,7 +219,7 @@ public class ModEntry : Mod
             // Avoid blocking main thread
             await Task.Run(() =>
             {
-                if (Config.CountSeedableTiles || Config.CountHarvestableTiles || Config.CountDryTiles)
+                if (ModConfig.Instance.CountSeedableTiles || ModConfig.Instance.CountHarvestableTiles || ModConfig.Instance.CountDryTiles)
                 {
                     foreach (var (pos, value) in Game1.currentLocation.terrainFeatures.Pairs)
                     {
@@ -230,16 +228,16 @@ public class ModEntry : Mod
                             if (value is HoeDirt dirt &&
                                 !Game1.currentLocation.IsTileOccupiedBy(pos, mask, CollisionMask.TerrainFeatures))
                             {
-                                if (Config.CountSeedableTiles && dirt.crop == null)
+                                if (ModConfig.Instance.CountSeedableTiles && dirt.crop == null)
                                 {
                                     seedableTiles++;
                                 }
-                                else if (Config.CountHarvestableTiles && dirt.readyForHarvest())
+                                else if (ModConfig.Instance.CountHarvestableTiles && dirt.readyForHarvest())
                                 {
                                     harvestableTiles++;
                                 }
 
-                                if (Config.CountDryTiles && !dirt.isWatered())
+                                if (ModConfig.Instance.CountDryTiles && !dirt.isWatered())
                                 {
                                     dryTiles++;
                                 }
@@ -248,7 +246,7 @@ public class ModEntry : Mod
                     }
                 }
 
-                if (Config.CountDiggableTiles)
+                if (ModConfig.Instance.CountDiggableTiles)
                 {
                     for (int x = minX; x <= maxX; x++)
                     {
@@ -274,7 +272,7 @@ public class ModEntry : Mod
                 }
             }
 
-            if (Config.CountSelectedTiles)
+            if (ModConfig.Instance.CountSelectedTiles)
             {
                 Game1.addHUDMessage(new HUDMessage(I18n.SelectedTiles((maxX - minX + 1) * (maxY - minY + 1)))
                 {
