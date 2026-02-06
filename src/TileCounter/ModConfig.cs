@@ -18,6 +18,12 @@ public sealed class ModConfig
         new Keybind(SButton.LeftControl, SButton.V),
         new Keybind(SButton.ControllerY, SButton.DPadRight));
 
+    public KeybindList ScanConnectedKeys { get; set; } = new(
+        new Keybind(SButton.LeftControl, SButton.X),
+        new Keybind(SButton.ControllerY, SButton.DPadDown));
+
+    public bool EightWayScan { get; set; } = true;
+
     public KeybindList SelectionModeKeys { get; set; } = new(
         new Keybind(SButton.LeftControl, SButton.C),
         new Keybind(SButton.ControllerY, SButton.DPadUp));

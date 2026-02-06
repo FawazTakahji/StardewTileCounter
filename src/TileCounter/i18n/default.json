@@ -1,22 +1,47 @@
 {
-  "simpleBorder": "Simple Border",
-  "countSelectedTiles": "Count Selected Tiles",
-  "countHarvestableTiles": "Count Harvestable Tiles",
-  "countDryTiles": "Count Dry Tiles",
-  "countSeedableTiles": "Count Seedable Tiles",
-  "countDiggableTiles": "Count Diggable Tiles",
+  "settings.title.general": "General Settings",
+  "settings.title.hud": "HUD Statistics",
+  "settings.title.keybinds": "Controls & Keybinds",
 
-  "keybinds": "Keybinds",
-  "scanCurrentLocation": "Scan Current Location",
-  "toggleSelectionMode": "Toggle Selection Mode",
-  "selectKey": "Select Key",
+  "settings.option.simpleBorder": "Use Minimalist Border",
+  "settings.option.simpleBorder.description": "If enabled, uses a basic colored rectangle for selection. If disabled, uses the custom textured borders.",
 
-  "noBackLayer": "Couldn't find the Back layer",
-  "countingTiles": "Counting Tiles...",
+  "settings.option.8wayScan": "Include Diagonal Connections",
+  "settings.option.8wayScan.description": "Enable 8-way connectivity for the Field Scan. If disabled, only tiles directly up, down, left, or right are counted.",
 
-  "selectedTiles": "Selected Tiles: {{count}}",
-  "harvestableTiles": "Harvestable Tiles: {{count}}",
-  "dryTiles": "Dry Tiles: {{count}}",
-  "seedableTiles": "Seedable Tiles: {{count}}",
-  "diggableTiles": "Diggable Tiles: {{count}}"
+  "settings.option.countSelectedTiles": "Show Total Area Size",
+  "settings.option.countSelectedTiles.description": "Displays the total count of all tiles within the scanned or selected area.",
+
+  "settings.option.countHarvestableTiles": "Show Harvestable Crops",
+  "settings.option.countHarvestableTiles.description": "Counts how many crops are fully grown and ready for harvest.",
+
+  "settings.option.countDryTiles": "Show Dry Soil",
+  "settings.option.countDryTiles.description": "Counts how many tilled tiles currently need watering.",
+
+  "settings.option.countSeedableTiles": "Show Empty Tilled Soil",
+  "settings.option.countSeedableTiles.description": "Counts tilled tiles that are currently empty and ready for seeds.",
+
+  "settings.option.countDiggableTiles": "Show Diggable Soil",
+  "settings.option.countDiggableTiles.description": "Counts untilled tiles that can be hoed (ignores occupied tiles).",
+
+  "settings.keybinds.scanLocation": "Scan Entire Map",
+  "settings.keybinds.scanLocation.description": "calculates statistics for every tile in your current location.",
+
+  "settings.keybinds.scanConnected": "Scan Connected Field",
+  "settings.keybinds.scanConnected.description": "Triggers a scan starting from the selected tile to find all connected tilled tiles.",
+
+  "settings.keybinds.toggleSelectionMode": "Toggle Manual Selection",
+  "settings.keybinds.toggleSelectionMode.description": "Enter or exit Selection Mode to manually select an area to scan.",
+
+  "settings.keybinds.selectTile": "Select / Confirm Tile",
+  "settings.keybinds.selectTile.description": "While in Selection Mode, use this to set your start and end points.",
+
+  "hud-message.error.noBackLayer": "Couldn't find the Back layer",
+
+  "hud-message.info.countingTiles": "Counting Tiles...",
+  "hud-message.info.selectedTiles": "Selected Tiles: {{count}}",
+  "hud-message.info.harvestableTiles": "Harvestable Crops: {{count}}",
+  "hud-message.info.dryTiles": "Dry Soil: {{count}}",
+  "hud-message.info.seedableTiles": "Seedable Soil: {{count}}",
+  "hud-message.info.diggableTiles": "Diggable Soil: {{count}}"
 }
