@@ -1,28 +1,43 @@
 # Tile Counter
-Tile Counter is a Stardew Valley mod that counts tiles with specific properties in a selected area.
+Tile Counter is a utility mod for Stardew Valley that allows you to quickly count tiles with specific properties—such as harvestable crops, unwatered dirt, or empty tilled soil—within a selected area or connected group.
 
 [Nexus Page](https://www.nexusmods.com/stardewvalley/mods/35853)
 
 ## Installation
-1. Install [SMAPI](https://smapi.io)
-2. Download the mod from [Releases](https://github.com/FawazTakahji/StardewTileCounter/releases)
-3. Download [GMCM](https://www.nexusmods.com/stardewvalley/mods/5098) if you want to edit the mod settings
+1. Install the latest version of [SMAPI](https://smapi.io).
+2. Download this mod and extract it into your `Stardew Valley/Mods` folder.
+3. (Optional) Install [Generic Mod Config Menu](https://www.nexusmods.com/stardewvalley/mods/5098) to easily change keybinds and settings in-game.
 
 ## Features
 - Gamepad support
-- Count all selected tiles
-- Count all tiles with fully grown crops
-- Count all digged tiles that need watering
-- Count all digged tiles that don't have a crop
-- Count all tiles that can be digged
+- Three Scan Modes:
+  - Area Scan: Select two corners to scan a rectangular area.
+  - Connected Scan: count all connected tilled soil (perfect for irregular crop layouts).
+  - Location Scan: Instantly scans the entire map.
+- Smart Selection: Automatically uses your mouse cursor; if using a gamepad or hiding the mouse, it targets the tile in front of your character.
+- Visual Borders: Dynamic, high-quality borders highlight your selection. Includes a "Simple Border" mode for a cleaner look.
+- Configurable Toggles: Choose exactly what you want to count:
+  - Total selected tiles.
+  - Harvestable crops.
+  - Dry (unwatered) tilled soil.
+  - Seedable (empty) tilled soil.
+  - Diggable (hoeable) tiles.
 
 ## Controls
-| Keybind | Keyboard | Xbox Gamepad | Playstation Gamepad |
+| Action | Keyboard | Xbox Gamepad | Playstation Gamepad |
 | :-: | :-: | :-: | :-: |
 | Scan Current Location | Ctrl + V | Y + DPad Right | Triangle + DPad Right |
-| Toggle Selection Mode | Ctrl + C | Y + DPad Up | Triangle + DPad Up |
+| Scan Connected Soil | Ctrl + X | Y + DPad Down | Triangle + DPad Down |
+| Toggle Area Mode | Ctrl + C | Y + DPad Up | Triangle + DPad Up |
 | Select Tile | Mouse Left Click | A | Cross |
 
+Note: Connected Scan requires you to click on a piece of tilled soil to start the scan.
+
+## Configuration
+Using Generic Mod Config Menu, you can:
+- Eight-Way Scan: Toggle whether the connected scan checks diagonally or only the four cardinal directions.
+- Simple Border: Switch between the decorative textured border and a simple semi-transparent color overlay.
+- HUD Settings: Enable or disable specific count notifications to reduce clutter.
 
 ## Screenshots
 <details>
@@ -41,22 +56,20 @@ Tile Counter is a Stardew Valley mod that counts tiles with specific properties 
   ![Notification](assets/screenshots/notification.png)
 </details>
 
-## Building
-The mod build package should be able to locate your game folder automatically, if it cant find it or if you want to specify it manually, edit the csproj file like so:
+## Building from Source
+The mod build package should locate your game folder automatically. If you need to specify it manually, edit the `.csproj` file:
 ```xml
 <PropertyGroup>
     ...
-    <GamePath>Your Game Path</GamePath>
+    <GamePath>YOUR_GAME_PATH_HERE</GamePath>
     ...
 </PropertyGroup>
 ```
-If you want to set this path for all projects, create a file called `stardewvalley.targets` in your home folder (`%userprofile%` | `~`) and add the following:
+Alternatively, you can set a global path by creating a `stardewvalley.targets` file in your user profile folder (`%userprofile%` on Windows or `~` on Linux/macOS):
 ```xml
 <Project>
    <PropertyGroup>
-      <GamePath>Your Game Path</GamePath>
+      <GamePath>YOUR_GAME_PATH_HERE</GamePath>
    </PropertyGroup>
 </Project>
 ```
-
-You should now be able to build and debug the mod using your IDE
