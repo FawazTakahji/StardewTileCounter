@@ -15,55 +15,91 @@ public static class Helpers
             () => ModConfig.Instance = new ModConfig(),
             () => modHelper.WriteConfig(ModConfig.Instance));
 
+        // General
+        api.AddSectionTitle(manifest, I18n.Settings_Title_General);
+
         api.AddBoolOption(
             manifest,
             () => ModConfig.Instance.SimpleBorder,
             value => ModConfig.Instance.SimpleBorder = value,
-            I18n.SimpleBorder);
+            I18n.Settings_Option_SimpleBorder,
+            I18n.Settings_Option_SimpleBorder_Description);
+
+        api.AddBoolOption(
+            manifest,
+            () => ModConfig.Instance.EightWayScan,
+            value => ModConfig.Instance.EightWayScan = value,
+            I18n.Settings_Option_8wayScan,
+            I18n.Settings_Option_8wayScan_Description);
+
+        // HUD
+        api.AddSectionTitle(manifest, I18n.Settings_Title_Hud);
+
         api.AddBoolOption(
             manifest,
             () => ModConfig.Instance.CountSelectedTiles,
             value => ModConfig.Instance.CountSelectedTiles = value,
-            I18n.CountSelectedTiles);
+            I18n.Settings_Option_CountSelectedTiles,
+            I18n.Settings_Option_CountSelectedTiles_Description);
+
         api.AddBoolOption(
             manifest,
             () => ModConfig.Instance.CountHarvestableTiles,
             value => ModConfig.Instance.CountHarvestableTiles = value,
-            I18n.CountHarvestableTiles);
+            I18n.Settings_Option_CountHarvestableTiles,
+            I18n.Settings_Option_CountHarvestableTiles_Description);
+
         api.AddBoolOption(
             manifest,
             () => ModConfig.Instance.CountDryTiles,
             value => ModConfig.Instance.CountDryTiles = value,
-            I18n.CountDryTiles);
+            I18n.Settings_Option_CountDryTiles,
+            I18n.Settings_Option_CountDryTiles_Description);
+
         api.AddBoolOption(
             manifest,
             () => ModConfig.Instance.CountSeedableTiles,
             value => ModConfig.Instance.CountSeedableTiles = value,
-            I18n.CountSeedableTiles);
+            I18n.Settings_Option_CountSeedableTiles,
+            I18n.Settings_Option_CountSeedableTiles_Description);
+
         api.AddBoolOption(
             manifest,
             () => ModConfig.Instance.CountDiggableTiles,
             value => ModConfig.Instance.CountDiggableTiles = value,
-            I18n.CountDiggableTiles);
+            I18n.Settings_Option_CountDiggableTiles,
+            I18n.Settings_Option_CountDiggableTiles_Description);
 
-        api.AddSectionTitle(manifest, I18n.Keybinds);
+        // Keybinds
+        api.AddSectionTitle(manifest, I18n.Settings_Title_Keybinds);
+
         api.AddKeybindList(
             manifest,
             () => ModConfig.Instance.ScanLocationKeys,
             keys => ModConfig.Instance.ScanLocationKeys = keys,
-            I18n.ScanCurrentLocation);
+            I18n.Settings_Keybinds_ScanLocation,
+            I18n.Settings_Keybinds_ScanLocation_Description);
+
+        api.AddKeybindList(
+            manifest,
+            () => ModConfig.Instance.ScanConnectedKeys,
+            keys => ModConfig.Instance.ScanConnectedKeys = keys,
+            I18n.Settings_Keybinds_ScanConnected,
+            I18n.Settings_Keybinds_ScanConnected_Description);
 
         api.AddKeybindList(
             manifest,
             () => ModConfig.Instance.SelectionModeKeys,
             keys => ModConfig.Instance.SelectionModeKeys = keys,
-            I18n.ToggleSelectionMode);
+            I18n.Settings_Keybinds_ToggleSelectionMode,
+            I18n.Settings_Keybinds_ToggleSelectionMode_Description);
 
         api.AddKeybindList(
             manifest,
             () => ModConfig.Instance.SelectTileKey,
             key => ModConfig.Instance.SelectTileKey = key,
-            I18n.SelectKey);
+            I18n.Settings_Keybinds_SelectTile,
+            I18n.Settings_Keybinds_SelectTile_Description);
     }
 
     public static Vector2 GetTileInFrontOfPlayer()
