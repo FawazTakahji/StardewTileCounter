@@ -1,0 +1,47 @@
+{
+  "settings.title.general": "常规设置",
+  "settings.title.hud": "HUD数据",
+  "settings.title.keybinds": "控制和按键绑定",
+
+  "settings.option.simpleBorder": "使用极简边框",
+  "settings.option.simpleBorder.description": "启用后，使用基本彩色矩形进行选择。禁用后，使用自定义纹理边框。",
+
+  "settings.option.8wayScan": "包括对角连接",
+  "settings.option.8wayScan.description": "启用区域扫描的八向连接功能。如果禁用此功能，则仅统计其正上方、正下方、正左侧或正右侧的地块。",
+
+  "settings.option.countSelectedTiles": "显示总面积",
+  "settings.option.countSelectedTiles.description": "显示扫描区域或选定区域内所有地块的总数。",
+
+  "settings.option.countHarvestableTiles": "展示可收获的作物",
+  "settings.option.countHarvestableTiles.description": "统计有多少作物已经完全成熟并可以收割。",
+
+  "settings.option.countDryTiles": "显示干燥耕地",
+  "settings.option.countDryTiles.description": "统计当前需要浇水的耕地数量。",
+
+  "settings.option.countSeedableTiles": "显示空置的耕地",
+  "settings.option.countSeedableTiles.description": "统计目前空置且可以播种的耕地数量。",
+
+  "settings.option.countDiggableTiles": "显示可开垦土壤",
+  "settings.option.countDiggableTiles.description": "统计可开垦的未开垦土壤地块（忽略已占用地块）。",
+
+  "settings.keybinds.scanLocation": "扫描整个地图",
+  "settings.keybinds.scanLocation.description": "计算您当前位置内每个地块的统计数据。",
+
+  "settings.keybinds.scanConnected": "扫描连接地块",
+  "settings.keybinds.scanConnected.description": "从选定的地块开始触发扫描，以查找所有相连的耕地。",
+
+  "settings.keybinds.toggleSelectionMode": "切换手动选择",
+  "settings.keybinds.toggleSelectionMode.description": "进入或退出选择模式来决定是否手动选择要扫描的区域。",
+
+  "settings.keybinds.selectTile": "选择 / 确认地块",
+  "settings.keybinds.selectTile.description": "在选择模式下，使用此功能设置扫描区域的起点和终点。",
+
+  "hud-message.error.noBackLayer": "找不到底层",
+
+  "hud-message.info.countingTiles": "数地块……",
+  "hud-message.info.selectedTiles": "选定地块: {{count}}",
+  "hud-message.info.harvestableTiles": "可收获作物: {{count}}",
+  "hud-message.info.dryTiles": "干燥耕地: {{count}}",
+  "hud-message.info.seedableTiles": "可播种耕地: {{count}}",
+  "hud-message.info.diggableTiles": "可开垦土壤: {{count}}"
+}

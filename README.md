@@ -56,6 +56,11 @@ Using Generic Mod Config Menu, you can:
   ![Notification](assets/screenshots/notification.png)
 </details>
 
+## Translations
+| Language | Status | Translators |
+| :-: | :-: | :-: |
+| Chinese | Complete | [Iqna](https://www.nexusmods.com/profile/Iqna) |
+
 ## Building from Source
 The mod build package should locate your game folder automatically. If you need to specify it manually, edit the `.csproj` file:
 ```xml
