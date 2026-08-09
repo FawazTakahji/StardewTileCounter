@@ -100,6 +100,8 @@ public class ModEntry : Mod
         if (ModConfig.Instance.ScanLocationKeys.JustPressed())
         {
             ScanCurrentLocation();
+
+            Helper.Input.SuppressActiveKeybinds(ModConfig.Instance.ScanLocationKeys);
         }
         else if (ModConfig.Instance.ScanConnectedKeys.JustPressed() && !_inAreaSelectionMode)
         {
@@ -114,13 +116,7 @@ public class ModEntry : Mod
                 Game1.playSound("breathout");
             }
 
-            foreach (Keybind keybind in ModConfig.Instance.ScanConnectedKeys.Keybinds)
-            {
-                foreach (SButton button in keybind.Buttons)
-                {
-                    Helper.Input.Suppress(button);
-                }
-            }
+            Helper.Input.SuppressActiveKeybinds(ModConfig.Instance.ScanConnectedKeys);
         }
         else if (ModConfig.Instance.SelectionModeKeys.JustPressed() && !_inConnectedSelectionMode)
         {
@@ -136,25 +132,13 @@ public class ModEntry : Mod
                 Game1.playSound("breathout");
             }
 
-            foreach (Keybind keybind in ModConfig.Instance.SelectionModeKeys.Keybinds)
-            {
-                foreach (SButton button in keybind.Buttons)
-                {
-                    Helper.Input.Suppress(button);
-                }
-            }
+            Helper.Input.SuppressActiveKeybinds(ModConfig.Instance.SelectionModeKeys);
         }
         else if (InSelectionMode && ModConfig.Instance.SelectTileKey.JustPressed())
         {
             TileClicked(Game1.wasMouseVisibleThisFrame ? Game1.currentCursorTile : Helpers.GetTileInFrontOfPlayer());
 
-            foreach (Keybind keybind in ModConfig.Instance.SelectTileKey.Keybinds)
-            {
-                foreach (SButton button in keybind.Buttons)
-                {
-                    Helper.Input.Suppress(button);
-                }
-            }
+            Helper.Input.SuppressActiveKeybinds(ModConfig.Instance.SelectTileKey);
         }
     }
 
