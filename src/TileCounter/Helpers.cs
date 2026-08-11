@@ -1,13 +1,32 @@
-﻿using GenericModConfigMenu;
+using GenericModConfigMenu;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewValley;
+using StardewValley.TerrainFeatures;
 
 namespace TileCounter;
 
 public static class Helpers
 {
+    private static readonly Vector2[] Directions4 = {
+        new(0, 1),  // up
+        new(0, -1), // down
+        new(1, 0),  // right
+        new(-1, 0)  // left
+    };
+
+    private static readonly Vector2[] Directions8 = {
+        new(0, 1),   // up
+        new(0, -1),  // down
+        new(1, 0),   // right
+        new(-1, 0),  // left
+        new(1, 1),   // up right
+        new(1, -1),  // down right
+        new(-1, 1),  // up left
+        new(-1, -1)  // down left
+    };
+
     public static void RegisterConfig(IGenericModConfigMenuApi api, IManifest manifest, IModHelper modHelper)
     {
         api.Register(
@@ -114,7 +133,7 @@ public static class Helpers
         };
     }
 
-    public static Vector2 TileToScreenCoordinates(Vector2 tile)
+    private static Vector2 TileToScreenCoordinates(Vector2 tile)
     {
         return new Vector2(tile.X * Game1.tileSize - Game1.viewport.X, tile.Y * Game1.tileSize - Game1.viewport.Y);
     }
@@ -259,8 +278,7 @@ public static class Helpers
                         }
                         else
                         {
-                            // middle
-                            continue;
+                            texture = (Textures.GreenBox.Overlay, 0f);
                         }
                     }
 
@@ -277,6 +295,182 @@ public static class Helpers
                         0f);
                 }
             }
+        }
+    }
+
+    public static HashSet<Vector2> GetConnectedTiles(GameLocation location, Vector2 startingTile, bool eightWayScan)
+    {
+        HashSet<Vector2> connectedTiles = new() { startingTile };
+
+        if (!location.terrainFeatures.TryGetValue(startingTile, out TerrainFeature? startFeature) || startFeature is not HoeDirt)
+        {
+            return connectedTiles;
+        }
+
+        HashSet<Vector2> tilledPositions = new();
+        foreach (var pair in location.terrainFeatures.Pairs)
+        {
+            if (pair.Value is HoeDirt)
+            {
+                tilledPositions.Add(pair.Key);
+            }
+        }
+
+        if (!tilledPositions.Contains(startingTile))
+        {
+            return connectedTiles;
+        }
+
+        Queue<Vector2> queue = new();
+        queue.Enqueue(startingTile);
+
+        ReadOnlySpan<Vector2> directions = eightWayScan ? Directions8 : Directions4;
+
+        while (queue.Count > 0)
+        {
+            Vector2 current = queue.Dequeue();
+            foreach (Vector2 direction in directions)
+            {
+                Vector2 next = current + direction;
+                if (tilledPositions.Contains(next) && connectedTiles.Add(next))
+                {
+                    queue.Enqueue(next);
+                }
+            }
+        }
+
+        return connectedTiles;
+    }
+
+    public static void RenderConnectedNoTextures(SpriteBatch spriteBatch, HashSet<Vector2> connectedTiles)
+    {
+        foreach (Vector2 tile in connectedTiles)
+        {
+            Vector2 screenTile = TileToScreenCoordinates(tile);
+            spriteBatch.Draw(
+                Game1.staminaRect,
+                screenTile,
+                new Rectangle(0, 0, 64, 64),
+                Color.Green * 0.5f);
+        }
+    }
+
+    public static void RenderConnectedTextures(SpriteBatch spriteBatch, HashSet<Vector2> connectedTiles)
+    {
+        foreach (Vector2 tile in connectedTiles)
+        {
+            Vector2 tileScreenPos = TileToScreenCoordinates(tile);
+
+            bool hasTopBorder = !connectedTiles.Contains(new Vector2(tile.X, tile.Y - 1));
+            bool hasRightBorder = !connectedTiles.Contains(new Vector2(tile.X + 1, tile.Y));
+            bool hasBottomBorder = !connectedTiles.Contains(new Vector2(tile.X, tile.Y + 1));
+            bool hasLeftBorder = !connectedTiles.Contains(new Vector2(tile.X - 1, tile.Y));
+
+            int borderCount = 0;
+            if (hasTopBorder)
+            {
+                borderCount++;
+            }
+            if (hasRightBorder)
+            {
+                borderCount++;
+            }
+            if (hasBottomBorder)
+            {
+                borderCount++;
+            }
+            if (hasLeftBorder)
+            {
+                borderCount++;
+            }
+
+            (Rectangle rect, float rot) texture;
+
+            if (borderCount == 4)
+            {
+                texture = (Textures.GreenBox.Complete, 0f);
+            }
+            else if (borderCount == 3)
+            {
+                if (!hasLeftBorder)
+                {
+                    texture = (Textures.GreenBox.ThreeLines.Rect, Textures.GreenBox.ThreeLines.TopRightBottom);
+                }
+                else if (!hasBottomBorder)
+                {
+                    texture = (Textures.GreenBox.ThreeLines.Rect, Textures.GreenBox.ThreeLines.TopRightLeft);
+                }
+                else if (!hasRightBorder)
+                {
+                    texture = (Textures.GreenBox.ThreeLines.Rect, Textures.GreenBox.ThreeLines.TopBottomLeft);
+                }
+                else
+                {
+                    texture = (Textures.GreenBox.ThreeLines.Rect, Textures.GreenBox.ThreeLines.BottomLeftRight);
+                }
+            }
+            else if (borderCount == 2)
+            {
+                if (hasLeftBorder && hasRightBorder)
+                {
+                    texture = (Textures.GreenBox.TwoLines.Rect, Textures.GreenBox.TwoLines.LeftRight);
+                }
+                else if (hasTopBorder && hasBottomBorder)
+                {
+                    texture = (Textures.GreenBox.TwoLines.Rect, Textures.GreenBox.TwoLines.TopBottom);
+                }
+                else if (hasTopBorder && hasLeftBorder)
+                {
+                    texture = (Textures.GreenBox.Corner.Rect, Textures.GreenBox.Corner.TopLef);
+                }
+                else if (hasTopBorder && hasRightBorder)
+                {
+                    texture = (Textures.GreenBox.Corner.Rect, Textures.GreenBox.Corner.TopRight);
+                }
+                else if (hasBottomBorder && hasRightBorder)
+                {
+                    texture = (Textures.GreenBox.Corner.Rect, Textures.GreenBox.Corner.BottomRight);
+                }
+                else
+                {
+                    texture = (Textures.GreenBox.Corner.Rect, Textures.GreenBox.Corner.BottomLeft);
+                }
+            }
+            else if (borderCount == 0)
+            {
+                texture = (Textures.GreenBox.Overlay, 0f);
+            }
+            else
+            {
+                if (hasTopBorder)
+                {
+                    texture = (Textures.GreenBox.Line.Rect, Textures.GreenBox.Line.Top);
+                }
+                else if (hasRightBorder)
+                {
+                    texture = (Textures.GreenBox.Line.Rect, Textures.GreenBox.Line.Right);
+                }
+                else if (hasBottomBorder)
+                {
+                    texture = (Textures.GreenBox.Line.Rect, Textures.GreenBox.Line.Bottom);
+                }
+                else
+                {
+                    texture = (Textures.GreenBox.Line.Rect, Textures.GreenBox.Line.Left);
+                }
+            }
+
+            Vector2 origin = new Vector2(texture.rect.Width / 2f, texture.rect.Height / 2f);
+            spriteBatch.Draw(
+                Textures.MainTexture,
+                tileScreenPos + origin,
+                texture.rect,
+                Color.White,
+                texture.rot,
+                origin,
+                Vector2.One,
+                SpriteEffects.None,
+                0f);
         }
     }
 }
