@@ -15,6 +15,7 @@ public struct Textures
     public struct GreenBox
     {
         public static readonly Rectangle Complete = new(0, 0, TexturePieceSize, TexturePieceSize);
+        public static readonly Rectangle Overlay = new(320, 0, TexturePieceSize, TexturePieceSize);
 
         public struct Corner
         {

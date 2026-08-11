@@ -1,9 +1,8 @@
-﻿using GenericModConfigMenu;
+using GenericModConfigMenu;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
-using StardewModdingAPI.Utilities;
 using StardewValley;
 using StardewValley.TerrainFeatures;
 using StardewValley.Tools;
@@ -80,13 +79,29 @@ public class ModEntry : Mod
 
         Vector2 tile = Game1.wasMouseVisibleThisFrame ? Game1.currentCursorTile : Helpers.GetTileInFrontOfPlayer();
 
-        if (!Textures.Loaded || ModConfig.Instance.SimpleBorder)
+        if (_inConnectedSelectionMode)
         {
-            Helpers.RenderNoTextures(e.SpriteBatch, tile, _selectedFirstTile);
+            HashSet<Vector2> connectedTiles = Helpers.GetConnectedTiles(Game1.currentLocation, tile, ModConfig.Instance.EightWayScan);
+
+            if (!Textures.Loaded || ModConfig.Instance.SimpleBorder)
+            {
+                Helpers.RenderConnectedNoTextures(e.SpriteBatch, connectedTiles);
+            }
+            else
+            {
+                Helpers.RenderConnectedTextures(e.SpriteBatch, connectedTiles);
+            }
         }
         else
         {
-            Helpers.RenderTextures(e.SpriteBatch, tile, _selectedFirstTile);
+            if (!Textures.Loaded || ModConfig.Instance.SimpleBorder)
+            {
+                Helpers.RenderNoTextures(e.SpriteBatch, tile, _selectedFirstTile);
+            }
+            else
+            {
+                Helpers.RenderTextures(e.SpriteBatch, tile, _selectedFirstTile);
+            }
         }
     }
 
@@ -326,55 +341,29 @@ public class ModEntry : Mod
             // Avoid blocking main thread
             await Task.Run(() =>
             {
-                HashSet<Vector2> connectedTiles = new();
-                Queue<Vector2> queue = new();
-
-                queue.Enqueue(startingTile);
-                connectedTiles.Add(startingTile);
-
-                List<Vector2> directions = new() {
-                    new(0, 1), // up
-                    new(0, -1), // down
-                    new(1, 0), // right
-                    new(-1, 0), // left
-                };
-                if (ModConfig.Instance.EightWayScan)
-                {
-                    directions.Add(new(1, 1)); // up right
-                    directions.Add(new(1, -1)); // down right
-                    directions.Add(new(-1, 1)); // up left
-                    directions.Add(new(-1, -1)); // down left
-                }
+                HashSet<Vector2> connectedTiles = Helpers.GetConnectedTiles(Game1.currentLocation, startingTile, ModConfig.Instance.EightWayScan);
                 const CollisionMask mask = CollisionMask.Buildings | CollisionMask.Flooring | CollisionMask.Furniture
                                            | CollisionMask.Objects | CollisionMask.LocationSpecific |
                                            CollisionMask.TerrainFeatures;
 
-                while (queue.Count > 0)
+                foreach (Vector2 current in connectedTiles)
                 {
-                    Vector2 current = queue.Dequeue();
-                    HoeDirt dirt = tilledTiles[current];
-                    if (ModConfig.Instance.CountSeedableTiles
-                        && dirt.crop == null
-                        && !Game1.currentLocation.IsTileOccupiedBy(current, mask, CollisionMask.TerrainFeatures))
+                    if (tilledTiles.TryGetValue(current, out HoeDirt? dirt))
                     {
-                        seedableTiles++;
-                    }
-                    else if (ModConfig.Instance.CountHarvestableTiles && dirt.readyForHarvest())
-                    {
-                        harvestableTiles++;
-                    }
-
-                    if (ModConfig.Instance.CountDryTiles && !dirt.isWatered())
-                    {
-                        dryTiles++;
-                    }
-
-                    foreach (Vector2 direction in directions)
-                    {
-                        Vector2 next = current + direction;
-                        if (tilledTiles.ContainsKey(next) && connectedTiles.Add(next))
+                        if (ModConfig.Instance.CountSeedableTiles
+                            && dirt.crop == null
+                            && !Game1.currentLocation.IsTileOccupiedBy(current, mask, CollisionMask.TerrainFeatures))
                         {
-                            queue.Enqueue(next);
+                            seedableTiles++;
+                        }
+                        else if (ModConfig.Instance.CountHarvestableTiles && dirt.readyForHarvest())
+                        {
+                            harvestableTiles++;
+                        }
+
+                        if (ModConfig.Instance.CountDryTiles && !dirt.isWatered())
+                        {
+                            dryTiles++;
                         }
                     }
                 }
